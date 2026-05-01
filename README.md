@@ -2,8 +2,7 @@
 Le Projet Jorge est un panel intelligent conçu pour recycler une tablette Microsoft Surface dont le tactile est défaillant en un centre de veille technologique autonome. L'appareil fonctionne sous Ubuntu et reste actif en permanence, bien que l'écran soit géré intelligemment pour économiser l'énergie et prolonger la durée de vie du matériel.
 <img width="2230" height="938" alt="image" src="https://github.com/user-attachments/assets/0f5768ff-a2af-4d72-ad24-7f232c49beeb" />
 
-<p>
-  <img align="left" width="490" height="165" src="https://github-readme-stats.vercel.app/api?username=Not mentioned&show_icons=true&hide_border=false&line_height=20&title_color=f69673&icon_color=1b93c9&show_owner=true&theme=dark"/>
+
   <p align="right">
     <img src="https://img.shields.io/badge/-HTML-E34F26?style=flat-square&logo=html&logoColor=white"/>
     <img src="https://img.shields.io/badge/-CSS-1572B6?style=flat-square&logo=css&logoColor=white"/>
@@ -24,6 +23,6 @@ Le Projet Jorge est un panel intelligent conçu pour recycler une tablette Micro
     <img src="https://img.shields.io/badge/-cosine%20similarity-333?style=flat-square&logo=cosinesimilarity&logoColor=white"/>
     <img src="https://img.shields.io/badge/-TTS-333?style=flat-square&logo=tts&logoColor=white"/>
   </p>
-</p>
+
 
 <br clear="both"/>
