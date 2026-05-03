@@ -1,0 +1,16 @@
+# Environnement virtuel
+venv/
+env/
+jorge/
+
+# Variables d'environnement (SÉCURITÉ)
+.env
+
+# Cache Python
+**/__pycache__/
+*.pyc
+
+# Distribution / Build
+dist/
+build/
+*.egg-info/
