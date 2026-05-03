@@ -31,9 +31,9 @@ Durant toute la journée, la Surface effectue du polling de flux Atom et RSS. El
 La partie IA consistera à intégrer un assistant à ce panel via une sorte de RAG. L'assistant aura accès aux quatre articles affichés à l'écran pour contextualiser ses réponses.
 Également, pour donner plus de vie au LLM (provenant de l'API Mistral), il y aura une phase de gestion d'affichage. Chaque message du LLM, qui sera exclusivement vocal, sera interprété pour capter l'émotion grâce à une similarité cosinus entre le message généré et les descriptions de chaque émotion ou animation que Jorge peut adopter. la vois vindera de piper tts en local 
 
-<br> **Format Json :**
-nouvelle new:
-server → Client <br>
+ **Format Json :** <br>
+nouvelle new:  <br>
+server → Client
 
 ```json
 {
