@@ -25,8 +25,46 @@
 
 
 # jorge
-Le Projet Jorge est un panel intelligent conçu pour recycler une tablette Microsoft Surface dont le tactile est défaillant en un centre de veille technologique autonome. L'appareil fonctionne sous Ubuntu et reste actif en permanence, bien que l'écran soit géré intelligemment pour économiser l'énergie et prolonger la durée de vie du matériel.
+Le Projet Jorge est un panel intelligent qui sera installé sur une ancienne tablette Microsoft Surface dont le tactile est défectueux. Le projet consiste à avoir la tablette avec Jorge posée sur mon bureau, allumée 24h/24 avec le programme qui tourne.
+La tablette sera sous Ubuntu avec l'écran éteint toute la journée. À 18h, si Home Assistant et mes capteurs détectent ma présence dans mon bureau, HA envoie à la Surface un ordre de réveil de l'écran via SSH, ainsi qu'un "start" au socket TCP qui s'allume.
+Durant toute la journée, la Surface effectue du polling de flux Atom et RSS. Elle réalise un scoring de tous les articles "new tech", notamment par embedding et autres méthodes, afin de sortir les quatre news les plus pertinentes de la journée. Et me la affichés à 18h si je suis la . 
+La partie IA consistera à intégrer un assistant à ce panel via une sorte de RAG. L'assistant aura accès aux quatre articles affichés à l'écran pour contextualiser ses réponses.
+Également, pour donner plus de vie au LLM (provenant de l'API Mistral), il y aura une phase de gestion d'affichage. Chaque message du LLM, qui sera exclusivement vocal, sera interprété pour capter l'émotion grâce à une similarité cosinus entre le message généré et les descriptions de chaque émotion ou animation que Jorge peut adopter. la vois vindera de piper tts en local 
 
-Ce projet me permet également de me former au dev Python car je viens du C++ QT à la base
+**Format Json :**
+nouvelle new:
+server → Client 
+
+```{
+  "type": "info/new_news",
+  "payload": [
+    {
+      "titre": "<titre>",
+      "resume_actionnable": "<résumé de la news>",
+      "score": 0
+    },
+    {
+      "titre": "<titre>",
+      "resume_actionnable": "<résumé de la news>",
+      "score": 0
+    },
+    {
+      "titre": "<titre>",
+      "resume_actionnable": "<résumé de la news>",
+      "score": 0
+    },
+    {
+      "titre": "<titre>",
+      "resume_actionnable": "<résumé de la news>",
+      "score": 0
+    }
+  ]
+}
+```
+
+
+
+
+
 <br clear="both"/>
 
