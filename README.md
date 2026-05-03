@@ -35,7 +35,8 @@ La partie IA consistera à intégrer un assistant à ce panel via une sorte de R
 nouvelle new:
 server → Client 
 
-```{
+```json
+{
   "type": "info/new_news",
   "payload": [
     {
