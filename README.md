@@ -32,8 +32,8 @@ La partie IA consistera à intégrer un assistant à ce panel via une sorte de R
 Également, pour donner plus de vie au LLM (provenant de l'API Mistral), il y aura une phase de gestion d'affichage. Chaque message du LLM, qui sera exclusivement vocal, sera interprété pour capter l'émotion grâce à une similarité cosinus entre le message généré et les descriptions de chaque émotion ou animation que Jorge peut adopter. la vois vindera de piper tts en local 
 
 **Format Json :**
-nouvelle new:
-server → Client 
+nouvelle new:[Entrée]
+server → Client [Entrée]
 
 ```json
 {
