@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JORGE — THE GLOBAL PANEL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <style>
+    :root {
+      --g: #B8E222;
+      --r: #E22322;
+      --w: #F0F6FC;
+      --b: #080808;
+      --b2: #111111;
+      --dim: #333333;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    html, body { width: 100vw; height: 100vh; overflow: hidden; background: var(--b); }
+    body { font-family: 'Share Tech Mono', monospace; color: var(--g); }
+
+    #wait { position: fixed; inset: 0; z-index: 50; background: var(--b); transition: opacity 1s ease; }
+    #wait.out { opacity: 0; pointer-events: none; }
+    #wait video { width: 100%; height: 100%; object-fit: cover; display: block; }
+    #ws-label { position: absolute; bottom: 24px; width: 100%; text-align: center; font-size: clamp(12px, 1vw, 16px); letter-spacing: 4px; color: var(--g); animation: blink 1.2s step-end infinite; background: rgba(8,8,8,0.6); padding: 10px 0; }
+
+    #app { width: 100vw; height: 100vh; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 1s ease; overflow: hidden; }
+    #app.in { opacity: 1; pointer-events: all; }
+
+    #header { display: flex; align-items: stretch; border-bottom: 1px solid var(--g); height: 78px; flex-shrink: 0; }
+    .logo-zone { width: 282px; flex-shrink: 0; border-right: 1px solid var(--g); background: var(--b); display: flex; align-items: center; justify-content: center; padding: 0; }
+    .logo-full-svg { width: 100%; height: 100%; max-height: 78px; object-fit: contain; padding: 4px; }
+    
+    #tickers { flex: 1; display: flex; align-items: stretch; overflow: hidden; background: var(--b); }
+    #tickers-loading { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--dim); font-size: clamp(12px, 1vw, 16px); letter-spacing: 3px; }
+    .pulse-text { animation: pulse-opacity 1.5s ease-in-out infinite; }
+    @keyframes pulse-opacity { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+    .ticker { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid var(--dim); padding: 5px; transition: background 0.2s; }
+    .ticker:last-child { border-right: none; }
+    .ticker.up  { border-color: var(--g); color: var(--g); }
+    .ticker.down{ border-color: var(--r); color: var(--r); }
+    .ticker-val  { font-size: clamp(18px, 2vw + 1vh, 42px); line-height: 1; letter-spacing: -0.5px; }
+    .ticker-name { font-size: clamp(9px, 0.8vw + 0.5vh, 16px); letter-spacing: 2px; margin-top: 4px; text-transform: uppercase; text-align: center; }
+    .ticker-arr  { font-size: clamp(9px, 0.8vw + 0.5vh, 16px); margin-top: 2px; }
+
+    #body { display: grid; grid-template-columns: 282px 1fr; flex: 1; overflow: hidden; }
+    #jorge-panel { border-right: 1px solid var(--g); display: flex; flex-direction: column; overflow: hidden; }
+    .panel-top { border-bottom: 1px solid var(--g); display: flex; align-items: center; flex-shrink: 0; height: 38px; }
+    .panel-label { font-size: 14px; letter-spacing: 3px; padding: 0 14px; border-right: 1px solid var(--g); display: flex; align-items: center; height: 100%; }
+    
+    #face-area { flex: none; height: 180px; position: relative; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; }
+    #face-canvas { image-rendering: pixelated; width: 160px; height: 160px; }
+    #jorge-status { font-size: 11px; letter-spacing: 2px; color: var(--g); opacity: 0; transition: opacity 0.3s; text-align: center; padding: 0 10px; white-space: nowrap; }
+    #jorge-status.show { opacity: 0.7; }
+    #response-area { border-top: 1px solid var(--g); padding: clamp(16px, 1.5vw, 32px); font-size: clamp(12px, 1vw + 0.6vh, 24px); line-height: 1.5; color: var(--w); flex: 1; overflow-y: auto; }
+    
+    #jorge-input-area { border-top: 1px solid var(--g); padding: 12px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; background: var(--b); }
+    #text-input { background: transparent; border: 1px solid var(--dim); color: var(--w); font-family: 'Share Tech Mono', monospace; font-size: 13px; padding: 8px 12px; outline: none; width: 100%; transition: border-color 0.2s; box-sizing: border-box; }
+    #text-input:focus { border-color: var(--g); }
+    #send-btn { background: transparent; border: 1px solid var(--g); color: var(--g); font-family: 'Share Tech Mono', monospace; font-size: 13px; padding: 8px 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box; transition: background 0.2s, color 0.2s; }
+    #send-btn:hover { background: var(--g); color: var(--b); }
+    .btn-svg { height: 10px; filter: invert(86%) sepia(21%) saturate(1067%) hue-rotate(29deg) brightness(97%) contrast(93%); }
+    #send-btn:hover .btn-svg { filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%); }
+
+    #news-panel { display: flex; flex-direction: column; overflow: hidden; flex: 1; }
+    #news-header { border-bottom: 1px solid var(--g); padding: 0 16px; display: flex; align-items: center; height: 38px; flex-shrink: 0; }
+    .news-tab { border: 1px solid var(--g); font-size: 14px; letter-spacing: 2px; padding: 2px 14px; text-transform: uppercase; }
+    #news-controls { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    
+    #mic-status { font-size: 11px; letter-spacing: 2px; color: var(--dim); }
+    #mic-status.on { color: var(--w); }
+    #mic-status.listening { color: var(--g); }
+    
+    #mic-waveform { display: flex; align-items: center; justify-content: center; gap: 3px; height: 16px; opacity: 0; width: 0; overflow: hidden; transition: opacity 0.2s, width 0.2s; }
+    #mic-waveform.active { opacity: 1; width: 40px; }
+    .wave-bar { width: 3px; height: 4px; background: var(--g); animation: wave-anim 0.4s infinite alternate; }
+    .wave-bar:nth-child(1) { animation-delay: 0.0s; }
+    .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.4s; }
+    @keyframes wave-anim { 0% { height: 4px; } 100% { height: 16px; } }
+
+    .deco-target { width: 24px; height: 24px; border: 2px solid var(--dim); position: relative; cursor: pointer; transition: transform 0.1s, border-color 0.2s; flex-shrink: 0; }
+    .deco-target::before { content: ''; position: absolute; top: 50%; left: -6px; right: -6px; height: 2px; background: var(--dim); transform: translateY(-50%); transition: background 0.2s; }
+    .deco-target::after  { content: ''; position: absolute; left: 50%; top: -6px; bottom: -6px; width: 2px; background: var(--dim); transform: translateX(-50%); transition: background 0.2s; }
+    .deco-dot { position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; background: var(--dim); transform: translate(-50%, -50%); transition: background 0.2s; }
+    .deco-target.active { border-color: var(--g); }
+    .deco-target.active::before, .deco-target.active::after, .deco-target.active .deco-dot { background: var(--g); }
+    .deco-target:active { transform: scale(0.85); }
+
+    #news-grid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: clamp(8px, 1.2vw, 24px); padding: clamp(8px, 1.2vw, 24px); background: var(--b); overflow: hidden; }
+    .news-card { background: var(--b2); padding: clamp(12px, 2vw, 40px); display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--dim); cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+    .news-card:hover { background: #181818; border-color: #555; }
+    .news-card.active { background: #0f1400; border-color: var(--g); }
+    .news-title { font-size: clamp(14px, 1.5vw + 1vh, 42px); line-height: 1.25; color: var(--r); font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: clamp(6px, 1.5vh, 24px); flex-shrink: 0; }
+    .news-title.alt { color: var(--g); }
+    .news-body { flex: 1; font-size: clamp(12px, 1.2vw + 0.8vh, 32px); line-height: 1.55; color: var(--w); overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; }
+    .news-body h1, .news-body h2, .news-body h3 { font-size: 1.1em; color: var(--g); margin-bottom: clamp(4px, 1vh, 16px); text-transform: uppercase; }
+    .news-body p { margin-bottom: clamp(4px, 1vh, 16px); }
+    .news-body p:last-child { margin-bottom: 0; }
+    .news-body strong { color: var(--g); font-weight: bold; }
+    .news-body ul { margin-left: clamp(16px, 2vw, 32px); margin-bottom: clamp(4px, 1vh, 16px); }
+    .news-footer { font-size: clamp(9px, 0.8vw + 0.4vh, 18px); letter-spacing: 1px; color: #666; border-top: 1px solid #222; padding-top: clamp(6px, 1vh, 16px); margin-top: clamp(6px, 1vh, 16px); flex-shrink: 0; text-transform: uppercase; }
+
+    #voice-bar { position: fixed; bottom: 0; left: 282px; right: 0; height: 0; overflow: hidden; background: rgba(8,8,8,0.95); display: flex; align-items: center; gap: 14px; padding: 0 20px; transition: height 0.3s ease, left 0.3s ease; font-size: 14px; letter-spacing: 1px; }
+    #voice-bar.active { height: 42px; border-top: 1px solid var(--g); }
+    #voice-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--r); flex-shrink: 0; animation: pulse-dot 0.7s ease-in-out infinite; }
+    #voice-transcript { color: var(--w); flex: 1; }
+    #voice-timer { color: var(--dim); flex-shrink: 0; }
+
+    @keyframes blink { 50% { opacity: 0; } }
+    @keyframes pulse-dot { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.6); opacity: 0.6; } }
+
+    @media (max-width: 1200px) { #body { grid-template-columns: 220px 1fr; } .logo-zone { width: 220px; } #voice-bar { left: 220px; } }
+    @media (max-width: 900px) { #news-grid { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); } #body { grid-template-columns: 1fr; } #jorge-panel { display: none; } .logo-zone { width: 100%; border-right: none; } #voice-bar { left: 0; } }
+  </style>
+</head>
+<body>
+
+<div id="wait">
+  <video id="wait-video" autoplay loop muted playsinline>
+    <source src="jorge_screen_wait.mp4" type="video/mp4">
+  </video>
+  <div id="ws-label">CONNEXION À JORGE...</div>
+</div>
+
+<div id="app">
+  <div id="header">
+    <div class="logo-zone">
+      <img src="SVG/jorge_logo.svg" alt="Jorge Logo" class="logo-full-svg" onerror="this.style.display='none'">
+    </div>
+    <div id="tickers">
+      <div id="tickers-loading">
+        <span class="pulse-text">EN ATTENTE DU FLUX BOURSIER[bourse/info]...</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="body">
+    <div id="jorge-panel">
+      <div class="panel-top"><span class="panel-label">JORGE</span></div>
+      <div id="face-area">
+        <canvas id="face-canvas" width="160" height="160"></canvas>
+        <div id="jorge-status"></div>
+      </div>
+      <div id="response-area"><span id="response-text"><span style="color:var(--dim)">>>></span> EN ATTENTE DE REQUÊTE...</span></div>
+      <div id="jorge-input-area">
+        <input id="text-input" type="text" placeholder="DEMANDE À JORGE..." maxlength="300">
+        <button id="send-btn">
+          <svg class="btn-svg" viewBox="0 0 10 10"><polygon points="0,0 10,5 0,10" /></svg>
+          ENVOYER
+        </button>
+      </div>
+    </div>
+
+    <div id="news-panel">
+      <div id="news-header">
+        <span class="news-tab">DAILY NEWS</span>
+        <div id="news-controls">
+          <span id="mic-status">MIC: OFF</span>
+          <div id="mic-waveform">
+            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+            <div class="wave-bar"></div><div class="wave-bar"></div>
+          </div>
+          <div class="deco-target" id="ptt-btn" title="Activer pour parler (STT)">
+            <div class="deco-dot"></div>
+          </div>
+        </div>
+      </div>
+      <div id="news-grid"></div>
+    </div>
+  </div>
+</div>
+
+<div id="voice-bar">
+  <div id="voice-dot"></div>
+  <span id="voice-transcript">EN ATTENTE...</span>
+  <span id="voice-timer"></span>
+</div>
+
+<script>
+marked.setOptions({ breaks: true, gfm: true });
+
+// ── AudioContext ──────────────────────────────────────────────────────────────
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+document.body.addEventListener('click', getAudioCtx, { once: true });
+
+// ── Constantes ────────────────────────────────────────────────────────────────
+const WS_URL    = 'ws://localhost:8765';
+const SILENCE_MS = 2500;
+
+// ── État global ───────────────────────────────────────────────────────────────
+let ws = null, wsConnected = false, dashboardShown = false, isListening = false, isProcessing = false;
+let currentEmotion = 'naturelle', silenceTimer = null, silenceCountdown = null, faceT = 0, currentSource = null;
+let activeTickers = [];
+
+// ── Éléments DOM ─────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const waitEl = $('wait'), wsLabel = $('ws-label'), appEl = $('app'), tickersEl = $('tickers');
+const newsGrid = $('news-grid'), faceCanvas = $('face-canvas'), faceCtx = faceCanvas.getContext('2d');
+const jorgeStatus = $('jorge-status');
+const responseArea = $('response-area'), responseText = $('response-text');
+const voiceBar = $('voice-bar'), voiceTransc = $('voice-transcript'), voiceTimer = $('voice-timer');
+const micStatus = $('mic-status'), textInput = $('text-input'), sendBtn = $('send-btn');
+const pttBtn = $('ptt-btn'), micWaveform = $('mic-waveform');
+
+// ════════════════════════════════════════════════════════════════════════════════
+//  STT — CORRECTIONS CHIRURGICALES SUR BASE DU CODE ORIGINAL QUI MARCHAIT
+//
+//  BUGS CORRIGÉS vs l'original :
+//  1. onresult itérait depuis i=0 à chaque event → résultats dupliqués/triplés
+//     → FIX : partir de e.resultIndex + séparer final vs interim
+//  2. Instance unique réutilisée → état interne Chrome corrompu au 2e usage
+//     → FIX : killRecog() + buildRecog() crée une instance neuve à chaque start
+//  3. recog.abort() dans fire() déclenchait onend qui relançait (armed=false ok,
+//     mais la neutralisation des handlers n'était pas garantie)
+//     → FIX : killRecog() nullifie onend AVANT abort, donc pas de respawn parasite
+// ════════════════════════════════════════════════════════════════════════════════
+
+let recog          = null;   // instance SpeechRecognition courante
+let armed          = false;  // true = session vocale active, on veut rester armé
+let finalTranscript = '';    // mots confirmés à 100% par Chrome (accumulés)
+
+/**
+ * Détruit proprement l'instance recog.
+ * Neutralise TOUS les handlers avant abort() pour éviter tout effet de bord.
+ */
+function killRecog() {
+  if (!recog) return;
+  recog.onstart  = null;
+  recog.onresult = null;
+  recog.onerror  = null;
+  recog.onend    = null;  // ← CRITIQUE : empêche le respawn lors du abort suivant
+  try { recog.abort(); } catch(e) {}
+  recog = null;
+}
+
+/**
+ * Crée et configure une instance SpeechRecognition fraîche.
+ * Appelé à chaque startListeningUI() ET à chaque respawn dans onend.
+ * continuous=true conservé (comme l'original), mais instance neuve = état propre.
+ */
+function buildRecog() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return null;
+
+  const r = new SR();
+  r.continuous      = true;   // Comme l'original
+  r.interimResults  = true;
+  r.lang            = 'fr-FR';
+  r.maxAlternatives = 1;
+
+  r.onstart = () => {
+    if (armed) { micStatus.className = 'listening'; micStatus.textContent = 'MIC: ●'; }
+  };
+
+  r.onresult = (e) => {
+    if (!armed) return;
+
+    // CORRECTION BUG #1 : départ depuis e.resultIndex (pas 0)
+    // L'original partait de 0 → chaque event redoublait le texte déjà traité
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        finalTranscript += e.results[i][0].transcript + ' ';
+      } else {
+        interim += e.results[i][0].transcript;
+      }
+    }
+
+    voiceTransc.textContent = (finalTranscript + interim).trim() || 'JE VOUS ÉCOUTE...';
+    sched(); // Toute parole repousse le timer de silence
+  };
+
+  r.onerror = (e) => {
+    // 'no-speech' et 'aborted' → laissé à onend pour relancer
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      micStatus.textContent = 'MIC: REFUSÉ';
+      fire(false);
+    }
+  };
+
+  r.onend = () => {
+    // Chrome a terminé la session (no-speech timeout, réseau, etc.)
+    // Si on est toujours armé → recréer une instance propre et relancer
+    // CORRECTION BUG #2 : on recrée avec buildRecog() au lieu de recog.start()
+    // sur la même instance corrompue
+    if (armed && dashboardShown) {
+      setTimeout(() => {
+        if (!armed) return;           // fire() a pu être appelé entre-temps
+        recog = buildRecog();         // Instance neuve = état Chrome propre
+        if (recog) try { recog.start(); } catch(e) {}
+      }, 80);
+    } else {
+      micStatus.className = '';
+      micStatus.textContent = 'MIC: OFF';
+    }
+  };
+
+  return r;
+}
+
+// ── WebSocket ─────────────────────────────────────────────────────────────────
+function connectWS() {
+  wsLabel.textContent = 'CONNEXION À JORGE...';
+  try {
+    ws = new WebSocket(WS_URL);
+    ws.onopen = () => {
+      wsConnected = true;
+      wsLabel.textContent = 'CONNECTÉ — CHARGEMENT DES DONNÉES...';
+      ws.send(JSON.stringify({ type: 'info/need' }));
+    };
+    ws.onmessage = async (e) => {
+      let msg; try { msg = JSON.parse(e.data); } catch { return; }
+      handleMessage(msg);
+    };
+    ws.onclose = () => {
+      wsConnected = false;
+      if (!dashboardShown) wsLabel.textContent = 'DÉCONNECTÉ — RECONNEXION...';
+      setTimeout(connectWS, 10000);
+    };
+    ws.onerror = () => { wsLabel.textContent = 'ERREUR RÉSEAU...'; };
+  } catch (err) { setTimeout(connectWS, 10000); }
+}
+
+function handleMessage(msg) {
+  switch (msg.type) {
+    case 'info/new_news':
+      if (!msg.payload || msg.payload.length === 0) {
+        wsLabel.textContent = 'RECHERCHE DE NOUVELLES EN COURS...';
+        setTimeout(() => { if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'info/need' })); }, 3000);
+      } else { renderNews(msg.payload); showDashboard(); }
+      break;
+
+    case 'bourse/info':
+      if (msg.payload) {
+        let newItems = [];
+        if (Array.isArray(msg.payload)) {
+          newItems = msg.payload;
+        } else if (typeof msg.payload === 'object' && msg.payload !== null) {
+          for (const key in msg.payload) {
+            const val = msg.payload[key];
+            const change = (val !== null && typeof val === 'object' && val.change !== undefined) ? val.change : val;
+            const name   = (val !== null && typeof val === 'object' && val.name  !== undefined) ? val.name  : key;
+            newItems.push({ name, change });
+          }
+        }
+        newItems.forEach(item => {
+          const changeVal = parseFloat(item.change) || 0;
+          activeTickers.unshift({ name: item.name || 'SYM', val: (changeVal > 0 ? '+' : '') + changeVal.toFixed(2) + '%', up: changeVal >= 0 });
+        });
+        if (activeTickers.length > 6) activeTickers = activeTickers.slice(0, 6);
+        updateTickers(activeTickers);
+      }
+      break;
+
+    case 'jorge/rep':
+      if (msg.payload && msg.payload.length > 0) {
+        const rep = msg.payload[0];
+        setEmotion(rep.emtion || rep.emotion || 'naturelle');
+        if (rep.texte) {
+          responseText.innerHTML = marked.parse(`> JORGE SYSTEM\n${rep.texte}`);
+        } else {
+          responseText.innerHTML = '<span style="color:var(--dim)">>>></span> JORGE RÉPOND (VOIX EN COURS)...';
+        }
+        setStatus('GÉNÉRATION TERMINÉE');
+        if (rep.audio_base64) { playAudioBase64(rep.audio_base64); }
+        else { isProcessing = false; hideStatus(); }
+      }
+      break;
+  }
+}
+
+function sendUserRequest(text) {
+  if (!text.trim()) return;
+  if (currentSource) { try { currentSource.stop(); } catch(e) {} currentSource = null; }
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'jorge/user_request', payload: [{ demande: text.trim() }] }));
+  }
+  isProcessing = true;
+  setEmotion('réfléchie');
+  setStatus('JORGE RÉFLÉCHIT...');
+  responseText.innerHTML = '<span style="color:var(--dim)">>>></span> TRAITEMENT DU PROMPT...';
+}
+
+async function playAudioBase64(b64) {
+  isProcessing = false;
+  setStatus('JORGE PARLE...');
+  try {
+    const ctx = getAudioCtx(), str = window.atob(b64), len = str.length, bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) bytes[i] = str.charCodeAt(i);
+    const buf = await ctx.decodeAudioData(bytes.buffer), src = ctx.createBufferSource();
+    src.buffer = buf; src.connect(ctx.destination); currentSource = src;
+    src.onended = () => { currentSource = null; setEmotion('naturelle'); hideStatus(); };
+    src.start(0);
+  } catch (err) { currentSource = null; setEmotion('naturelle'); hideStatus(); }
+}
+
+function showDashboard() {
+  if (dashboardShown) return;
+  dashboardShown = true;
+  waitEl.classList.add('out');
+  appEl.classList.add('in');
+  setTimeout(() => { waitEl.style.display = 'none'; }, 1100);
+  startFaceLoop();
+  // Pas d'initVoice() global — l'instance est créée à la demande au clic PTT
+}
+
+function setStatus(text) { jorgeStatus.textContent = text; jorgeStatus.classList.add('show'); }
+function hideStatus() { jorgeStatus.classList.remove('show'); }
+
+function updateTickers(data) {
+  tickersEl.innerHTML = data.map(t =>
+    `<div class="ticker ${t.up ? 'up' : 'down'}"><div class="ticker-val">${t.val}</div><div class="ticker-name">${t.name}</div><div class="ticker-arr">${t.up ? '▲' : '▼'}</div></div>`
+  ).join('');
+}
+
+function askAbout(idx) {
+  const card = document.getElementById('card-' + idx);
+  if (!card) return;
+  document.querySelectorAll('.news-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+  const title = card.querySelector('.news-title').textContent;
+  if (title !== '—' && title !== 'SANS TITRE') sendUserRequest(`Parle-moi plus de l'article : ${title}`);
+}
+
+function adjustLineClamps() {
+  document.querySelectorAll('.news-body').forEach(card => {
+    card.style.webkitLineClamp = 'unset';
+    const h = card.clientHeight;
+    let lh = parseFloat(window.getComputedStyle(card).lineHeight);
+    if (isNaN(lh)) lh = parseFloat(window.getComputedStyle(card).fontSize) * 1.55;
+    const maxLines = Math.floor(h / lh);
+    card.style.display = '-webkit-box';
+    card.style.webkitBoxOrient = 'vertical';
+    card.style.webkitLineClamp = maxLines > 0 ? maxLines : 1;
+    card.style.overflow = 'hidden';
+  });
+}
+let resizeTimer;
+window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(adjustLineClamps, 100); });
+
+function renderNews(articles) {
+  const fill = articles.slice(0, 4);
+  while (fill.length < 4) fill.push({ titre: '—', resume_actionnable: '', score: null });
+  newsGrid.innerHTML = fill.map((a, i) => {
+    const bodyContent = a.resume_actionnable ? marked.parse(a.resume_actionnable) : '<span style="color:#444">...</span>';
+    return `<div class="news-card" id="card-${i}" onclick="askAbout(${i})">
+      <div class="news-title ${i % 2 === 0 ? '' : 'alt'}">${a.titre || 'SANS TITRE'}</div>
+      <div class="news-body">${bodyContent}</div>
+      <div class="news-footer">SCORE IA : ${a.score !== null ? parseFloat(a.score).toFixed(2) : 'N/A'}</div>
+    </div>`;
+  }).join('');
+  setTimeout(adjustLineClamps, 50);
+}
+
+// ── Face canvas ───────────────────────────────────────────────────────────────
+const G = '#B8E222';
+function px(x, y, w = 8, h = 8, c = G) { faceCtx.fillStyle = c; faceCtx.fillRect(x, y, w, h); }
+const DRAW = {
+  naturelle(t) { const b=Math.floor(t/90)%14===0; if(b){px(44,77,26,3);px(90,77,26,3);}else{px(44,72,26,6);px(90,72,26,6);} },
+  joie(t) { const b=Math.sin(t*0.05)*3; px(44,69+b,8,6);px(54,63+b,8,6);px(64,69+b,8,6);px(92,69+b,8,6);px(102,63+b,8,6);px(112,69+b,8,6);px(58,100+b,6,6);px(66,104+b,6,6);px(74,106+b,6,6);px(82,104+b,6,6);px(90,100+b,6,6); },
+  'énerver'(t) { const tw=Math.floor(t/7)%2*2; px(44,66+tw,8,6);px(54,72+tw,8,6);px(64,78+tw,8,6);px(92,78+tw,8,6);px(102,72+tw,8,6);px(112,66+tw,8,6);px(52,106,8,5);px(62,102,8,5);px(72,98,8,5);px(82,102,8,5);px(92,106,8,5); },
+  sarcasme(t) { const w=Math.sin(t*0.07)>0?0:4; px(44,68,26,5);px(90,60,26,5);px(96,80+w,14,4);px(72,100,6,5);px(78,98,6,5);px(84,96,6,5);px(90,98,6,5); },
+  endormie(t) { const s=Math.sin(t*0.018)*2.5; px(38,74+s,8,5);px(46,70+s,8,5);px(54,74+s,8,5);px(62,78+s,4,5);px(90,74+s,8,5);px(98,70+s,8,5);px(106,74+s,8,5);px(114,78+s,4,5);px(62,100+s,36,5); },
+  réfléchie(t) { faceCtx.save();faceCtx.translate(80,80);faceCtx.rotate(t*0.022);for(let i=0;i<8;i++){faceCtx.save();faceCtx.rotate((i/8)*Math.PI*2);faceCtx.fillStyle=G;faceCtx.fillRect(-4,-36,8,10);faceCtx.restore();}faceCtx.strokeStyle=G;faceCtx.lineWidth=6;faceCtx.beginPath();faceCtx.arc(0,0,19,0,Math.PI*2);faceCtx.stroke();faceCtx.fillStyle='#080808';faceCtx.beginPath();faceCtx.arc(0,0,11,0,Math.PI*2);faceCtx.fill();faceCtx.restore(); }
+};
+function setEmotion(n) { const m={natural:'naturelle',naturel:'naturelle',énervé:'énerver',angry:'énerver',réfléchi:'réfléchie',thinking:'réfléchie',sleep:'endormie',sarcastic:'sarcasme',joy:'joie',happy:'joie'}; currentEmotion=DRAW[n.toLowerCase()]?n.toLowerCase():(m[n.toLowerCase()]||'naturelle'); }
+function startFaceLoop() { (function loop(){ faceT++; faceCtx.clearRect(0,0,160,160); (DRAW[currentEmotion]||DRAW.naturelle)(faceT); requestAnimationFrame(loop); })(); }
+
+// ── STT : démarrage ───────────────────────────────────────────────────────────
+function startListeningUI() {
+  if (isProcessing) return;
+  if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) {
+    micStatus.textContent = 'MIC: N/A'; return;
+  }
+
+  killRecog();          // Garantit un état propre avant chaque session
+  armed = true;
+  finalTranscript = '';
+  isListening = true;
+
+  voiceBar.classList.add('active');
+  pttBtn.classList.add('active');
+  micWaveform.classList.add('active');
+  micStatus.className = 'listening';
+  micStatus.textContent = 'MIC: INIT...';
+  voiceTransc.textContent = 'JE VOUS ÉCOUTE...';
+
+  recog = buildRecog();
+  if (recog) try { recog.start(); } catch(e) {}
+
+  sched();
+}
+
+function sched() {
+  clearTimeout(silenceTimer); clearInterval(silenceCountdown);
+  let r = SILENCE_MS / 1000;
+  voiceTimer.textContent = r.toFixed(1) + 's';
+  silenceCountdown = setInterval(() => { r -= 0.1; voiceTimer.textContent = Math.max(0, r).toFixed(1) + 's'; }, 100);
+  silenceTimer = setTimeout(() => fire(true), SILENCE_MS);
+}
+
+// ── STT : arrêt + envoi ───────────────────────────────────────────────────────
+function fire(shouldSend = true) {
+  clearTimeout(silenceTimer); clearInterval(silenceCountdown);
+  voiceTimer.textContent = '';
+  if (!armed) return;
+
+  armed = false;
+  isListening = false;
+
+  voiceBar.classList.remove('active');
+  pttBtn.classList.remove('active');
+  micWaveform.classList.remove('active');
+  micStatus.className = '';
+  micStatus.textContent = 'MIC: OFF';
+
+  const q = finalTranscript.trim();
+  finalTranscript = '';
+  voiceTransc.textContent = 'EN ATTENTE...';
+
+  // CORRECTION BUG #3 : killRecog() neutralise onend AVANT abort
+  // → pas de respawn parasite après fire()
+  killRecog();
+
+  if (shouldSend && q.length > 1) sendUserRequest(q);
+}
+
+// ── Bouton PTT ────────────────────────────────────────────────────────────────
+pttBtn.addEventListener('click', () => {
+  if (isProcessing) return;
+  if (armed) { fire(true); } else { startListeningUI(); }
+});
+
+sendBtn.addEventListener('click', () => { const q = textInput.value.trim(); if (q && dashboardShown) { sendUserRequest(q); textInput.value = ''; } });
+textInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendBtn.click(); });
+
+connectWS();
+</script>
+</body>
+</html>
