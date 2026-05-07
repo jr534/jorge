@@ -2,6 +2,26 @@
 
 <img width="100%" alt="Jorge UI" src="https://github.com/user-attachments/assets/0f5768ff-a2af-4d72-ad24-7f232c49beeb" />
 
+<div align="right">
+  <img src="https://img.shields.io/badge/-HTML-E34F26?style=flat-square&logo=html5&logoColor=white"/>
+  <img src="https://img.shields.io/badge/-CSS-1572B6?style=flat-square&logo=css3&logoColor=white"/>
+  <img src="https://img.shields.io/badge/-JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black"/>
+  <img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&logo=python&logoColor=white"/>
+  <img src="https://img.shields.io/badge/-Apache-D22128?style=flat-square&logo=apache&logoColor=white"/>
+  <img src="https://img.shields.io/badge/-sentence_transformers-333?style=flat-square"/>
+  <img src="https://img.shields.io/badge/-scikit_learn-F7931E?style=flat-square&logo=scikit-learn&logoColor=white"/>
+  <img src="https://img.shields.io/badge/-yfinance-333?style=flat-square"/>
+  <img src="https://img.shields.io/badge/-WebSocket-010101?style=flat-square&logo=socketdotio&logoColor=white"/>
+  <img src="https://img.shields.io/badge/-asyncio-333?style=flat-square"/>
+  <img src="https://img.shields.io/badge/-httpx-333?style=flat-square"/>
+  <img src="https://img.shields.io/badge/-Home_Assistant-41BDF5?style=flat-square&logo=home-assistant&logoColor=white"/>
+  <img src="https://img.shields.io/badge/-SSH-333?style=flat-square"/>
+  <img src="https://img.shields.io/badge/-RAG-333?style=flat-square"/>
+  <img src="https://img.shields.io/badge/-Mistral_API-FF7000?style=flat-square"/>
+  <img src="https://img.shields.io/badge/-cosine_similarity-333?style=flat-square"/>
+  <img src="https://img.shields.io/badge/-TTS-333?style=flat-square"/>
+</div>
+
 Le projet **Jorge** est un panel intelligent installe sur une ancienne tablette Microsoft Surface. Le front est servi par Apache2, tandis que le backend Python expose un serveur WebSocket sur le port `8765`.
 
 Jorge recupere des flux Atom/RSS, score les articles tech avec des embeddings, affiche les quatre news les plus pertinentes, repond par IA et renvoie une voix synthetisee au front.
