@@ -1,0 +1,12 @@
+beautifulsoup4
+edge-tts
+feedparser
+google-genai
+httpx
+python-dotenv
+scikit-learn
+sentence-transformers
+torch
+trafilatura
+websockets
+yfinance
