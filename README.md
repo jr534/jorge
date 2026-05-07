@@ -305,6 +305,9 @@ Server -> Client:
 }
 ```
 
+### Liste des émotions
+
+<img width="100%" alt="Émotions Jorge" src="https://github.com/user-attachments/assets/dccd4813-3d79-4afc-bf83-749affb319f2" />
 ### Bourse
 
 Server -> Client:
