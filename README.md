@@ -26,7 +26,7 @@ Le projet **Jorge** est un panel intelligent installe sur une ancienne tablette 
 
 Jorge recupere des flux Atom/RSS, score les articles tech avec des embeddings, affiche les quatre news les plus pertinentes, repond par IA et renvoie une voix synthetisee au front.
 
-La tablette reste posee sur le bureau, allumee 24h/24 avec le programme qui tourne. Pendant la journee, Jorge fait du polling de flux Atom et RSS, score les articles "new tech", puis affiche les quatre nouvelles les plus pertinentes.
+La tablette reste posee sur le bureau, allumee 24h/24 avec le programme qui tourne. Pendant la journee, Jorge fait de le récupération de flux Atom et RSS, score les articles "new tech", puis affiche les quatre nouvelles les plus pertinentes.
 
 La partie IA fonctionne comme un assistant contextualise par les articles affiches. Les reponses vocales sont analysees pour choisir une emotion, puis envoyees au front sous forme d'audio encode en base64.
 
