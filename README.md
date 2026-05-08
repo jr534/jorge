@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/-httpx-333?style=flat-square"/>
   <img src="https://img.shields.io/badge/-Home_Assistant-41BDF5?style=flat-square&logo=home-assistant&logoColor=white"/>
   <img src="https://img.shields.io/badge/-SSH-333?style=flat-square"/>
-  <img src="https://img.shields.io/badge/-RAG-333?style=flat-square"/>
+  <img src="https://img.shields.io/badge/-CAG-333?style=flat-square"/>
   <img src="https://img.shields.io/badge/-Mistral_API-FF7000?style=flat-square"/>
   <img src="https://img.shields.io/badge/-cosine_similarity-333?style=flat-square"/>
   <img src="https://img.shields.io/badge/-TTS-333?style=flat-square"/>
